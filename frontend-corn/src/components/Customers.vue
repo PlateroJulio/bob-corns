@@ -2,6 +2,7 @@
 import type { IPurchaseHistory } from '@/types'
 import { useCustomerStore } from '@/stores/customer'
 import DetailPurchase from '@/components/DetailPurchase.vue'
+import CreateCustomer from '@/components/CreateCustomer.vue'
 
 defineProps<{
   items: IPurchaseHistory[]
@@ -19,6 +20,7 @@ const handleBuy = async (item: IPurchaseHistory) => {
   <div class="flex flex-col items-center justify-center w-full mt-10 text-right">
   <h1 class="text-4xl text-blue-400 border-b-2 border-b-blue-200">Bob'Customers</h1>
   <DetailPurchase />
+  <CreateCustomer/>
 
   <!-- Contenedor con scroll -->
   <div class="w-full max-w-full mt-6 h-[600px] overflow-y-auto">
