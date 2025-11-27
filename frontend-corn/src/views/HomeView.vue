@@ -5,7 +5,7 @@ import Customers from '@/components/Customers.vue'
 
 const customerStore = useCustomerStore()
 onMounted(() => {
-  customerStore.fetchPurchaseHistory()
+  customerStore.fetchCustomers()
 })
 </script>
 

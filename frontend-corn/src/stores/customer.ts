@@ -1,12 +1,15 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { IHistory, IPurchaseHistory } from '@/types'
+import type { ICreateCustomer, IHistory, IPurchaseHistory } from '@/types'
 import { storeService } from '@/services/store.service'
+import { customerService } from '@/services/customer.service'
+
 import { useToast } from 'vue-toastification'
+import { minDelay, sleepFunc } from '@/utils'
 
 export const useCustomerStore = defineStore('customer', () => {
   const purchaseHistory = ref<IPurchaseHistory[]>([])
-  const loadingHistory = ref<string | null>(null) // loading por cliente
+  const loadingHistory = ref<string | null>(null)
   const loadingBuy = ref<Record<string, boolean>>({})
   const toast = useToast()
 
@@ -18,40 +21,49 @@ export const useCustomerStore = defineStore('customer', () => {
     purchaseHistory.value.reduce((acc, item) => acc + item.quantityFailed, 0),
   )
 
-  const fetchPurchaseHistory = async () => {
+  const fetchCustomers = async () => {
     loadingHistory.value = 'fetch'
     try {
-      const data: IHistory = await storeService.getPurchaseHistory('')
+      const data: IHistory = await customerService.getCustomers()
       purchaseHistory.value = data.data
+      loadingBuy.value = Object.fromEntries(purchaseHistory.value.map((item) => [item.key, false]))
     } finally {
       loadingHistory.value = null
     }
   }
 
-  const addPurchase = (item: IPurchaseHistory) => {
-    purchaseHistory.value.push(item)
-  }
-
-  const updatePurchase = (updated: IPurchaseHistory) => {
-    const index = purchaseHistory.value.findIndex((p) => p.key === updated.key)
-    if (index !== -1) purchaseHistory.value[index] = updated
-  }
-
   const buyCustomerCorn = async (item: IPurchaseHistory) => {
     try {
       loadingBuy.value[item.key] = true
-      await storeService.buyCorn({ key: item.key, data: item })
+      await minDelay(
+      storeService.buyCorn({ key: item.key, data: item }),
+      600 
+    )
       toast.success(`🌽 Compra exitosa de ${item.name}!`)
     } catch (error: any) {
       if (error.response?.status === 429) {
         toast.error('⚠️ Límite de compras alcanzado. Intenta más tarde.')
+        await sleepFunc(500)
       } else {
         toast.error(`❌ Error comprando a ${item.name}: ${error.message || 'Desconocido'}`)
       }
       throw error
     } finally {
-      await fetchPurchaseHistory()
+      await fetchCustomers()
       loadingBuy.value[item.key] = false
+    }
+  }
+
+  const createCustomer = async (item: ICreateCustomer) => {
+    try {
+      await customerService.create(item)
+      toast.success(`Comprador ${item.name} creado!`)
+    } catch (error: any) {
+      toast.error(
+        `❌ Error al intentar crear comprador ${item.name}: ${error.message || 'Desconocido'}`,
+      )
+    } finally {
+      await fetchCustomers()
     }
   }
 
@@ -60,9 +72,8 @@ export const useCustomerStore = defineStore('customer', () => {
     loadingBuy,
     totalSuccess,
     totalFailed,
-    fetchPurchaseHistory,
+    fetchCustomers,
     buyCustomerCorn,
-    addPurchase,
-    updatePurchase,
+    createCustomer,
   }
 })

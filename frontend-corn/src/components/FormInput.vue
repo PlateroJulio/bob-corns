@@ -18,12 +18,12 @@ const { value, errorMessage, handleBlur } = useField(props.name)
 
 <template>
     <div class="space-y-1 w-96">
-        <label class="block text-sm font-medium text-gray-700">
+        <label class="flex text-sm font-medium text-right text-gray-700">
             {{ props.label }}
         </label>
 
         <input :type="props.type" v-model="value" :placeholder="props.placeholder" @blur="handleBlur"
-            class="w-full p-2 transition border rounded-md outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            class="w-full p-2 transition border-2 rounded-md outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
 
         <div class="h-5 overflow-hidden">
             <p v-if="errorMessage"
