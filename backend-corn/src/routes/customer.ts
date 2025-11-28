@@ -1,14 +1,11 @@
-  import express from "express";
-  import { mainMiddlewares } from "@middlewares/main.middleware";
-  import { CustomerController } from "@controllers/index"
+import express from "express";
+import { mainMiddlewares } from "@middlewares/main.middleware";
+import { CustomerController } from "@controllers/index";
 
-  const customerRouter = express.Router();
+const customerRouter = express.Router();
 
-  customerRouter.get(
-    "/all",
-    mainMiddlewares(["validateKeyHeader"]),
-    CustomerController.getAll
-  );
+customerRouter.get("/all", CustomerController.getAll);
 
-  export { customerRouter };
+customerRouter.post("/create", CustomerController.create);
 
+export { customerRouter };
